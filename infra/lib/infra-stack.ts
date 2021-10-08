@@ -12,6 +12,10 @@ export class Page2PodStack extends cdk.Stack {
   constructor(scope: cdk.Construct, id: string, props?: cdk.StackProps) {
     super(scope, id, props);
 
+    /*
+     * Set up a site that will host page for adding new episodes to the podcast
+     * It will also host the podcasts index and audio files
+     */
     // Create the S3 bucket
     const podcastBucket = new s3.Bucket(this, 'Page2PodBucket', {
       versioned: true,
@@ -22,6 +26,9 @@ export class Page2PodStack extends cdk.Stack {
     });
 
 
+    /*
+     * Set up the lambda/API that will take the text/url and add an episode to a podcast.
+     */
     // Create the Page2PodFunction lambda
     const funcAsset = new assets.Asset(this, 'Page2PodZip', {
       path: path.join(__dirname, '../../page2pod.zip'),
