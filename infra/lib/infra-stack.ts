@@ -1,12 +1,26 @@
 import * as cdk from '@aws-cdk/core';
+import * as s3 from '@aws-cdk/aws-s3';
+import * as cloudfront from '@aws-cdk/aws-cloudfront';
+import * as origins from '@aws-cdk/aws-cloudfront-origins';
 import * as lambda from '@aws-cdk/aws-lambda';
 import * as apigateway from "@aws-cdk/aws-apigateway";
+import * as s3deployment from "@aws-cdk/aws-s3-deployment";
 import assets = require("@aws-cdk/aws-s3-assets")
 import path = require("path")
 
 export class Page2PodStack extends cdk.Stack {
   constructor(scope: cdk.Construct, id: string, props?: cdk.StackProps) {
     super(scope, id, props);
+
+    // Create the S3 bucket
+    const podcastBucket = new s3.Bucket(this, 'Page2PodBucket', {
+      versioned: true,
+    });
+    // Serve the contents over HTTPS
+    const podcastDistribution = new cloudfront.Distribution(this, 'Page2PodDist', {
+        defaultBehavior: { origin: new origins.S3Origin(podcastBucket) },
+    });
+
 
     // Create the Page2PodFunction lambda
     const funcAsset = new assets.Asset(this, 'Page2PodZip', {
@@ -22,6 +36,7 @@ export class Page2PodStack extends cdk.Stack {
       environment: {
       }
     });
+    podcastBucket.grantReadWrite(handler);
 
     // Set up the api gateway for the Page2PodFunction
     const api = new apigateway.RestApi(this, "Page2PodAPI", {
@@ -33,5 +48,10 @@ export class Page2PodStack extends cdk.Stack {
     });
     api.root.addMethod("POST", postIntegration);
 
+    // Deploy site files to S3
+    new s3deployment.BucketDeployment(this, 'InexHtmle', {
+      sources: [s3deployment.Source.asset("./site/")],
+      destinationBucket: podcastBucket,
+    });
   }
 }
