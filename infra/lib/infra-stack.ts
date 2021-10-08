@@ -24,6 +24,18 @@ export class Page2PodStack extends cdk.Stack {
     const podcastDistribution = new cloudfront.Distribution(this, 'Page2PodDist', {
         defaultBehavior: { origin: new origins.S3Origin(podcastBucket) },
     });
+    // Deploy site files to S3
+    new s3deployment.BucketDeployment(this, 'IndexHtml', {
+      sources: [s3deployment.Source.asset("./site/")],
+      destinationBucket: podcastBucket,
+    });
+    const page2PodAdminUrl = "https://" + podcastDistribution.domainName + "/index.html";
+    new cdk.CfnOutput(this, "PageToPodAdminUrl", {
+      description: "The url of the PageToPod admin page",
+      value: page2PodAdminUrl,
+      exportName: "PageToPodAdminUrl",
+    });
+
 
 
     /*
@@ -54,11 +66,5 @@ export class Page2PodStack extends cdk.Stack {
       requestTemplates: { "application/json": '{ "statusCode": "200" }' }
     });
     api.root.addMethod("POST", postIntegration);
-
-    // Deploy site files to S3
-    new s3deployment.BucketDeployment(this, 'InexHtmle', {
-      sources: [s3deployment.Source.asset("./site/")],
-      destinationBucket: podcastBucket,
-    });
   }
 }
