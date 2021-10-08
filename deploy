@@ -3,4 +3,17 @@
 GOOS=linux GOARCH=amd64 go build -o page2pod.linux .
 zip -j page2pod.zip page2pod.linux
 
+# Replace the API endpoint with the actual version (worlds dumbest template system)
+TEMPLATE_DIR="./infra/site-templates/"
+ENDPOINT_FILE="${TEMPLATE_DIR}/page2pro_api_endpoint.txt"
+
+# Clean up files/dirs
+rm "${ENDPOINT_FILE}"
+rm -rf ./infra/site/
+mkdir -p  ./infra/site/
+
+# Make the replacement
+echo -n "${PAGE2POD_API_ENDPOINT}" > "${ENDPOINT_FILE}"
+m4 "${TEMPLATE_DIR}/index.html" > "./infra/site/index.html"
+
 (cd infra && cdk synth && cdk deploy)

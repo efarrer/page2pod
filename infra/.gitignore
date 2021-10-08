@@ -1,7 +1,9 @@
 *.js
+site
 !jest.config.js
 *.d.ts
 node_modules
+site-templates/page2pro_api_endpoint.txt
 
 # CDK asset staging directory
 .cdk.staging
