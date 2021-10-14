@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/bash -e
 
 GOOS=linux GOARCH=amd64 go build -o page2pod.linux .
 zip -j page2pod.zip page2pod.linux
