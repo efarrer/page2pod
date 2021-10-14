@@ -6,6 +6,7 @@ import (
 
 	"github.com/aws/aws-lambda-go/events"
 	"github.com/aws/aws-lambda-go/lambda"
+	"github.com/efarrer/page2pod/authentication"
 	"github.com/efarrer/page2pod/htmlform"
 )
 
@@ -17,6 +18,14 @@ func HandleRequest(ctx context.Context, req events.APIGatewayProxyRequest) (even
 	formData, err := htmlform.Parse(req.Body)
 	if err != nil {
 		return events.APIGatewayProxyResponse{}, fmt.Errorf("Unable to parse form data: %w", err)
+	}
+
+	err = authentication.Authenticate(formData.Username, formData.Password)
+	if err != nil {
+		return events.APIGatewayProxyResponse{
+			StatusCode: 401,
+			Body:       "Unable to authenticate " + formData.Username,
+		}, nil
 	}
 
 	return events.APIGatewayProxyResponse{

@@ -4,6 +4,7 @@ import * as cloudfront from '@aws-cdk/aws-cloudfront';
 import * as origins from '@aws-cdk/aws-cloudfront-origins';
 import * as lambda from '@aws-cdk/aws-lambda';
 import * as apigateway from "@aws-cdk/aws-apigateway";
+import * as iam from "@aws-cdk/aws-iam";
 import * as s3deployment from "@aws-cdk/aws-s3-deployment";
 import assets = require("@aws-cdk/aws-s3-assets")
 import path = require("path")
@@ -56,6 +57,10 @@ export class Page2PodStack extends cdk.Stack {
       }
     });
     podcastBucket.grantReadWrite(handler);
+    handler.addToRolePolicy(new iam.PolicyStatement({
+      actions: ["secretsmanager:GetSecretValue"],
+      resources: ['*'],
+    }));
 
     // Set up the api gateway for the Page2PodFunction
     const api = new apigateway.RestApi(this, "Page2PodAPI", {
