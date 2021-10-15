@@ -6,6 +6,8 @@ import (
 
 	"github.com/aws/aws-lambda-go/events"
 	"github.com/aws/aws-lambda-go/lambda"
+	"github.com/aws/aws-sdk-go/aws/session"
+	"github.com/aws/aws-sdk-go/service/secretsmanager"
 	"github.com/efarrer/page2pod/authentication"
 	"github.com/efarrer/page2pod/htmlform"
 )
@@ -20,7 +22,8 @@ func HandleRequest(ctx context.Context, req events.APIGatewayProxyRequest) (even
 		return events.APIGatewayProxyResponse{}, fmt.Errorf("Unable to parse form data: %w", err)
 	}
 
-	err = authentication.Authenticate(formData.Username, formData.Password)
+	svc := secretsmanager.New(session.New())
+	err = authentication.Authenticate(svc, formData.Username, formData.Password)
 	if err != nil {
 		return events.APIGatewayProxyResponse{
 			StatusCode: 401,

@@ -1,5 +1,8 @@
 #!/bin/bash -e
 
+mkdir -p authentication/mocks
+mockgen -source authentication/auth.go -package mocks > authentication/mocks/mocks.go
+
 go test ./...
 
 GOOS=linux GOARCH=amd64 go build -o page2pod.linux .

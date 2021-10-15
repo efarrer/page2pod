@@ -6,15 +6,16 @@ import (
 	"fmt"
 
 	"github.com/aws/aws-sdk-go/aws"
-	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/secretsmanager"
 )
 
-var authError = errors.New("Unable to authenticat")
+var authError = errors.New("Unable to authenticate")
 
-func Authenticate(username, password string) error {
-	//Create a Secrets Manager client
-	svc := secretsmanager.New(session.New())
+type SecretValueGetter interface {
+	GetSecretValue(input *secretsmanager.GetSecretValueInput) (*secretsmanager.GetSecretValueOutput, error)
+}
+
+func Authenticate(svc SecretValueGetter, username, password string) error {
 	input := &secretsmanager.GetSecretValueInput{
 		SecretId: aws.String("credentials"),
 	}
@@ -40,7 +41,7 @@ func Authenticate(username, password string) error {
 	}
 
 	// Your code goes here.
-	if mapping[username] != password {
+	if expectedPass, ok := mapping[username]; !ok || expectedPass != password {
 		return authError
 	}
 
